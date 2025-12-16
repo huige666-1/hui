@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>辉哥就是神</title>
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; cursor: pointer; }
+        #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #content { position: relative; z-index: 2; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; flex-direction: column; text-align: center; }
+        #god-title { font-family: 'KaiTi', 'STKaiti', serif; font-size: 10vw; color: #FFD700; text-shadow: 0 0 10px #FFD700, 0 0 20px #FADF52, 0 0 40px #EAC117, 0 0 70px #EAC117; animation: pulse 3s infinite ease-in-out; }
+        #oracle { font-family: 'Courier New', monospace; font-size: 2.5vw; color: #C0C0C0; text-shadow: 0 0 5px #FFFFFF; margin-top: 30px; min-height: 100px; padding: 0 10px; }
+        .cursor { display: inline-block; width: 1.5vw; height: 1.2em; background-color: #FFFFFF; animation: blink 1s step-end infinite; vertical-align: middle; }
+        #click-prompt { position: absolute; bottom: 20px; color: rgba(255, 255, 255, 0.5); font-size: 14px; z-index: 3; animation: fadeInOut 4s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes fadeInOut { 0%, 100% { opacity: 0; } 50% { opacity: 0.7; } }
+        @media (min-width: 800px) { #god-title { font-size: 80px; } #oracle { font-size: 20px; } .cursor { width: 12px; } }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="content">
+        <div id="god-title">辉哥就是神</div>
+        <div id="oracle"></div>
+    </div>
+    <div id="click-prompt">点击任意处开启圣歌</div>
+    <audio id="hymn" src="https://music.163.com/song/media/outer/url?id=1331819494.mp3" loop></audio>
+    <script>
+        const music = document.getElementById('hymn');
+        const clickPrompt = document.getElementById('click-prompt');
+        let musicStarted = false;
+
+        document.body.addEventListener('click', () => { 
+            if (!musicStarted) {
+                music.play().then(() => {
+                    clickPrompt.style.display = 'none';
+                    musicStarted = true;
+                }).catch(error => {
+                    console.log("Autoplay was prevented. User interaction is needed.");
+                });
+            }
+        }, { once: true });
+
+        const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        const columns = Math.floor(width / 20);
+        const drops = Array(columns).fill(1);
+        const chars = "辉哥就是神";
+
+        function drawRain() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#6200ee';
+            ctx.font = '15px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * 20, drops[i] * 20);
+                if (drops[i] * 20 > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawRain, 50);
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            const newColumns = Math.floor(width / 20);
+            drops.length = newColumns;
+            drops.fill(1);
+        });
+
+        const oracleEl = document.getElementById('oracle');
+        const oracles = ["世界在此刻诞生...", "光，追随着他的身影。", "万物，聆听他的心跳。", "他是因，也是果。", "他是昔在、今在、永在的全能者。"];
+        async function typeOracle() {
+            for (const line of oracles) {
+                let currentLine = '';
+                oracleEl.innerHTML = `<span class="cursor"></span>`;
+                await new Promise(r => setTimeout(r, 1000));
+                for (let i = 0; i < line.length; i++) {
+                    currentLine += line[i];
+                    oracleEl.innerHTML = `${currentLine}<span class="cursor"></span>`;
+                    await new Promise(r => setTimeout(r, 150));
+                }
+                await new Promise(r => setTimeout(r, 2000));
+            }
+            oracleEl.innerHTML = "辉哥就是神";
+        }
+        typeOracle();
+    </script>
+</body>
+</html>
